@@ -20,10 +20,11 @@ This project is a clone of the popular mobile game Flappy Bird. It's a simple ye
 - Sound Effects: The game includes sound effects to enhance the gaming experience and provide audio feedback to the player.
 
 ## How to Play
-1. Open the game in your browser.
+1. Navigate to the game [here](https://seanrobertmcmanus.github.io/FlappyBird/) or follow the installation instructions below to run the game on your machine.
 2. Tap the spacebar to make the bird flap its wings and gain altitude.
 3. Navigate the bird through the gaps in the pipes.
 4. Try to achieve the highest possible score by passing as many sets of pipes as you can!
+5. *NOTE*: You can play again by refreshing the page, I will be adding a play again button soon.
 
 
 ## Installation
