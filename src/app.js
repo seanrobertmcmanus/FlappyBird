@@ -30,7 +30,7 @@ const GRAVITY = 0.4;
 // Collision
 const PIPE_COLLISION_END_X = 160;
 const PIPE_COLLISION_START_X = 260;
-const BOTTOM_PIPE_COLLISION_Y = 285;
+const BOTTOM_PIPE_COLLISION_Y = 288;
 const TOP_PIPE_COLLISION_Y = -32;
 
 // CSS Classes
