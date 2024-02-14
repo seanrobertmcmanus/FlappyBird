@@ -16,7 +16,6 @@ This project is a clone of the popular mobile game Flappy Bird. It's a simple ye
 - Endless Gameplay: The game has no end - the challenge is to achieve the highest possible score. The pipes' positions vary, requiring the player to constantly adjust their strategy.
 - Score Counter: The game includes a score counter, which increments with each set of pipes passed. This allows players to keep track of their progress and set personal bests.
 - Charming Graphics: True to the original game, our clone features simple yet appealing pixel art graphics, creating a nostalgic and enjoyable gaming experience.
-- Responsive Design: The game is designed to be playable on various screen sizes, ensuring a seamless experience across different devices.
 - Sound Effects: The game includes sound effects to enhance the gaming experience and provide audio feedback to the player.
 
 ## How to Play
@@ -24,7 +23,7 @@ This project is a clone of the popular mobile game Flappy Bird. It's a simple ye
 2. Tap the spacebar to make the bird flap its wings and gain altitude.
 3. Navigate the bird through the gaps in the pipes.
 4. Try to achieve the highest possible score by passing as many sets of pipes as you can!
-5. *NOTE*: You can play again by refreshing the page, I will be adding a play again button soon.
+
 
 
 ## Installation

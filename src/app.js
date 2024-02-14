@@ -37,10 +37,17 @@ const TOP_PIPE_COLLISION_Y = -32;
 const GROUND_MOVING = "ground-moving";
 const BASE_GROUND = "ground";
 
+// Game Screen
+const SCREENS = {
+  start: "start",
+  gameplay: "gameplay",
+  gameOver: "gameOver",
+};
+
 // DOM EVENT LISTENER
 document.addEventListener("DOMContentLoaded", () => {
   let game = new FlappyBird();
-  game.startGame();
+  game.startMenu();
 });
 
 // Flappy Bird Game
@@ -51,9 +58,15 @@ class FlappyBird {
   #skyDOM;
   #groundDOM;
   #scoreDOM;
+  #startMenuDOM;
+  #startMenuTextDOM;
+  #gameOverDOM;
+  #gameOverScoreDOM;
+  #gameOverHighScoreDOM;
 
   // Game Objects
   #bird;
+  #pipes;
   // Timers
   #gameLoopTimer;
   #pipeGenTimer;
@@ -63,6 +76,13 @@ class FlappyBird {
   #isCollision;
   #lastTime;
   #score;
+  #highScore;
+  #gameScreen; // Start Menu, Gameplay, Game Over
+  #dieSound;
+  #diveSound;
+  #hitSound;
+  #pointSound;
+  #flySound;
 
   constructor() {
     // DOM
@@ -71,13 +91,40 @@ class FlappyBird {
     this.#skyDOM = document.querySelector(".sky");
     this.#groundDOM = document.querySelector(".ground");
     this.#scoreDOM = document.getElementById("score-container");
+    this.#startMenuDOM = document.getElementById("start-menu"); // Start Menu
+    this.#startMenuTextDOM = document.getElementById("start-menu-text"); // Start Menu Text
+    this.#gameOverDOM = document.getElementById("game-over"); // Game Over
+    this.#gameOverScoreDOM = document.getElementById("score"); // Game Over Score
+    this.#gameOverHighScoreDOM = document.getElementById("best-score"); // Game Over High Score
+
     // Game State
     this.#isGameOver = false;
     this.#isCollision = false;
     this.#lastTime = 0;
+    this.#gameScreen = SCREENS.start;
+
+    // Sounds
+    this.#dieSound = new Audio("assets/sound/die.wav");
+    this.#diveSound = new Audio("assets/sound/dive.wav");
+    this.#hitSound = new Audio("assets/sound/hit.wav");
+    this.#pointSound = new Audio("assets/sound/point.wav");
+    this.#flySound = new Audio("assets/sound/fly.wav");
+    // Preload Sounds
+    this.#dieSound.preload = "auto";
+    this.#diveSound.preload = "auto";
+    this.#hitSound.preload = "auto";
+    this.#pointSound.preload = "auto";
+    this.#flySound.preload = "auto";
+    // Set Volume
+    this.#dieSound.volume = 0.5;
+    this.#diveSound.volume = 0.5;
+    this.#hitSound.volume = 0.3;
+    this.#pointSound.volume = 0.2;
+    this.#flySound.volume = 0.5;
 
     // Game Objects
     // Bird
+    this.#pipes = [];
     this.#bird = new Bird(
       BIRD_START_X,
       BIRD_START_Y,
@@ -86,22 +133,65 @@ class FlappyBird {
       JUMP_HEIGHT,
       MAX_HEIGHT,
       MAX_ROTATION,
-      this.#birdDOM
+      this.#birdDOM,
+      this.#flySound
     );
     // Bind Controls
     this.controls = this.controls.bind(this); // bind controls to game
     // Init Controls
     document.addEventListener("keyup", this.controls); // jump on spacebar
-    //
+    // Scores
     this.#score = 0;
+    this.#highScore = this.getHighScore();
   }
 
   // Start Menu
+  startMenu() {
+    // Show Start Menu
+    this.#startMenuDOM.className = "start-menu-container ";
+    // Bird Flap
+    this.#flapTimer = setInterval(() => {
+      this.birdFlap();
+    }, FLAP_INTERVAL);
+  }
 
-  // Game Over Menu
-
+  // Game Over
+  setGameOver() {
+    this.#isGameOver = true;
+    // Stop Game Loop
+    clearInterval(this.#gameLoopTimer);
+    clearInterval(this.#pipeGenTimer);
+    clearInterval(this.#flapTimer);
+    // Stop Ground Movement
+    this.#groundDOM.className = BASE_GROUND;
+    // Hide Score Counter
+    this.#scoreDOM.className = "hidden";
+    // Save Score
+    this.saveScore();
+    // Show Game Over Screen
+    this.#gameScreen = SCREENS.gameOver;
+    this.#gameOverDOM.className = "game-over-container";
+    // Show Scores
+    this.showScore();
+  }
   // Start Game
   startGame() {
+    // Set game state
+    if (this.#isGameOver) {
+      this.#isCollision = false;
+      this.#isGameOver = false;
+      this.deletePipes();
+      this.#lastTime = 0;
+      this.#score = 0;
+    }
+
+    // Play Dive Sound
+    this.#diveSound.play();
+
+    // Ground Movement
+    this.#groundDOM.className = GROUND_MOVING;
+    // Show Score Counter
+    this.#scoreDOM.className = "score";
     // Start Game Loop
     this.#gameLoopTimer = setInterval(
       () => this.gameLoop(),
@@ -138,18 +228,10 @@ class FlappyBird {
     }
   }
 
-  // Game Over
-  setGameOver() {
-    this.#isGameOver = true;
-    // Stop Game Loop
-    clearInterval(this.#gameLoopTimer);
-    clearInterval(this.#pipeGenTimer);
-    clearInterval(this.#flapTimer);
-    // Stop Ground Movement
-    this.#groundDOM.className = BASE_GROUND;
-  }
-
   setCollision() {
+    // Play Hit Sound
+    this.#hitSound.currentTime = 0;
+    this.#hitSound.play();
     // Set Collision
     this.#isCollision = true;
     // Set Bird Speed to 0 on collision
@@ -175,6 +257,7 @@ class FlappyBird {
       TOP_PIPE_COLLISION_Y
     );
     pipe.draw();
+
     // Pipe Movement
     const movePipe = () => {
       let bird = this.#bird.getBirdPos();
@@ -193,13 +276,27 @@ class FlappyBird {
       }
       // Check if bird has passed pipe
       if (pipe.hasPassed()) {
+        // Play Point Sound
+        this.#pointSound.currentTime = 0;
+        this.#pointSound.play();
+        // Update Score
         this.#score++;
         this.updateScore();
       }
     };
 
     let timerId = setInterval(() => movePipe(), 20);
+    this.#pipes.push([pipe, timerId]);
     //setTimeout(() => this.generatePipes(), PIPE_GEN_TIME);
+  }
+  // Delete Pipes
+  deletePipes() {
+    // Delete Pipe from Scene
+    this.#pipes.forEach((pipe) => pipe[0].delete());
+    // Delete Pipe Timer
+    this.#pipes.forEach((pipe) => clearInterval(pipe[1]));
+    // Clear Pipes Array
+    this.#pipes = [];
   }
 
   // Effects
@@ -211,6 +308,7 @@ class FlappyBird {
   }
   // Score Update
   updateScore() {
+    // Update Score
     this.#scoreDOM.innerHTML = "";
     const scoreStr = this.#score.toString();
     for (const digit of scoreStr) {
@@ -219,10 +317,44 @@ class FlappyBird {
       this.#scoreDOM.appendChild(img);
     }
   }
-  // Screen Flash
+
+  // Save Score
+  saveScore() {
+    if (this.#score > this.#highScore) {
+      this.#highScore = this.#score;
+      localStorage.setItem("highScore", this.#score);
+    }
+  }
+
+  // Get High Score
+  getHighScore() {
+    return localStorage.getItem("highScore") || 0;
+  }
+  // Show Score
+  showScore() {
+    // Show Score
+    this.#gameOverScoreDOM.innerHTML = "";
+    const scoreStr = this.#score.toString();
+    for (const digit of scoreStr) {
+      const img = document.createElement("img");
+      img.src = `assets/images/${digit}.png`; // Set the source to the correct image
+      this.#gameOverScoreDOM.appendChild(img);
+    }
+    // Show High Score
+    this.#gameOverHighScoreDOM.innerHTML = "";
+    console.log(this.#highScore);
+    const highScoreStr = this.#highScore.toString();
+    for (const digit of highScoreStr) {
+      const img = document.createElement("img");
+      img.src = `assets/images/${digit}.png`; // Set the source to the correct image
+      this.#gameOverHighScoreDOM.appendChild(img);
+    }
+  }
+  // Screen Flash and play die sound
   triggerFlash() {
     this.#gameDisplayDOM.style.animation = "flash 0.15s"; // Duration of 0.5s is an example, adjust as needed
-
+    this.#dieSound.currentTime = 0; // Reset the sound to the beginning
+    this.#dieSound.play();
     // Remove the animation style after it's complete
     this.#gameDisplayDOM.addEventListener(
       "animationend",
@@ -235,9 +367,41 @@ class FlappyBird {
   // Game Controls
   controls(e) {
     // Jump
-    if (e.keyCode === 32 && !this.#isCollision && !this.#isGameOver) {
-      this.#lastTime = 0;
-      this.#bird.jump();
+    if (e.keyCode === 32) {
+      // Gamplay Controls
+      if (
+        this.#gameScreen === SCREENS.gameplay &&
+        !this.#isCollision &&
+        !this.#isGameOver
+      ) {
+        this.#lastTime = 0;
+        this.#bird.jump();
+        this.#flySound.play();
+      }
+      // Start Menu Controls
+      if (this.#gameScreen === SCREENS.start) {
+        clearInterval(this.#flapTimer); // stop bird flap
+        // Setup Game Screen
+        this.#lastTime = 0;
+        this.#bird.jump();
+        this.#flySound.play();
+        this.#startMenuDOM.className = "hidden";
+        this.#startMenuTextDOM.className = "hidden";
+        this.#gameScreen = SCREENS.gameplay;
+        // Start Game
+        this.startGame();
+      }
+      // Restart Game
+      if (this.#gameScreen === SCREENS.gameOver && this.#isGameOver) {
+        this.#gameOverDOM.className = "hidden";
+        this.#gameScreen = SCREENS.gameplay;
+        this.#score = 0;
+        this.#lastTime = 0;
+        this.#bird.reset(BIRD_START_X, BIRD_START_Y);
+        this.#bird.jump();
+        this.#flySound.play();
+        this.startGame();
+      }
     }
   }
 }

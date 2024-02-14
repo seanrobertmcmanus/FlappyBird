@@ -1,7 +1,18 @@
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+@font-face {
+    font-family: 'FlappyBirdFont';
+    src: url(assets/text/FlappyBirdy.ttf);
+}
+
+@font-face {
+    font-family: 'FlappyBirdFontRegular';
+    src: url(assets//text/O4B.ttf);
 }
 
 .game-frame{
@@ -17,6 +28,154 @@
     position: absolute;
     overflow: hidden;
 }
+
+
+.hidden {
+    display: none;
+
+}
+
+/* Start Menu CSS */
+.start-menu-container {
+    position: absolute;
+    width: 500px;
+    height: 730px;
+    z-index: 5;
+    background-image: url(assets/images/message.png);
+    background-repeat: no-repeat;
+    background-size: 60%;
+    background-position: 50% 20%;
+}
+
+@keyframes startMenuMove {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+.start-menu-container .start-menu-text {
+    position: absolute;
+    top: 50%;
+    left: 35%;
+    font-family: 'FlappyBirdFont';
+    font-size: 30px;
+    color: white;
+    text-align: center;
+    animation: startMenuMove 2s infinite;
+    -webkit-animation: startMenuMove 2s infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+
+}
+/* Game Over CSS */
+.game-over-container {
+    position: absolute;
+    width: 500px;
+    height: 730px;
+    z-index: 5;
+    background-image: url(assets/images/gameover.png);
+    background-repeat: no-repeat;
+    background-size: 60%;
+    background-position: 50% 20%;
+}
+
+.game-over-container .game-over-text {
+    position: absolute;
+    top: 60%;
+    left: 25%;
+    font-family: 'FlappyBirdFont';
+    font-size: 40px;
+    color: white;
+    text-align: center;
+    animation: startMenuMove 2s infinite;
+    -webkit-animation: startMenuMove 2s infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+
+}
+
+
+.game-over-container .score-container {
+    position: absolute;
+    background-color: #dfd996;
+    box-shadow: 
+        4px 0 0 #dfd996,    /* Right white shadow */
+        -4px 0 0 #dfd996,   /* Left white shadow */
+        0 -4px 0 #dfd996,   /* Top white shadow */
+        0 4px 0 #dfd996,    /* Bottom white shadow */
+        6px 0 0 chocolate,     /* Right blue shadow */
+        -6px 0 0 chocolate,    /* Left blue shadow */
+        0 -6px 0 chocolate,    /* Top blue shadow */
+        0 6px 0 chocolate,     /* Bottom blue shadow */
+        0 0 0 4px chocolate;   /* Outline blue shadow */
+    margin: 8px auto;
+    width: 250px;
+    height: 100px;
+    top: 30%;
+    left: 25%;
+    z-index: 5;
+    background-repeat: no-repeat;
+    background-size: 60%;
+    background-position: 50% 20%;
+    border-radius: 10px;
+}
+
+.game-over-container .score-container .game-over-score {
+    font-smooth: never;
+    -webkit-font-smoothing : none;
+    position: absolute;
+    font-family: 'FlappyBirdFontRegular';
+    font-size: 20px;
+    color:chocolate;
+}
+
+.score-container .best {
+    top: 10%;
+    left: 10%;
+}
+
+.score-container .score {
+    top: 10%;
+    left: 50%;
+}
+
+#score {
+    position: absolute;
+    top: 30px;
+    left: 0px;
+    background-color: #b4ae6d;
+    padding: 8px 12px;
+    display: flex;
+    min-width: 80px;
+    justify-content: center;
+}
+
+#best-score {
+    position: absolute;
+    top: 30px;
+    left: 0px;
+    background-color: #b4ae6d;
+    padding: 8px 12px;
+    display: flex;
+    min-width: 80px;
+    justify-content: center;
+}
+
+
+#best-score img{
+    padding-right: 2px;
+
+}
+
+#score img {
+    padding-right: 2px;
+}
+/* Game Play CSS */
 
 /* Game Background */
 .sky {

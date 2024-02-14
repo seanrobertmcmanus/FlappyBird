@@ -18,6 +18,10 @@ export class Bird {
   #vertSpeed;
   #rotation;
 
+  // Sounds
+  #flySound;
+  #diveSound;
+
   // Bird Flap Animation
   #flapAnimation = [BIRD_DOWN_FLAP, BIRD_MID_FLAP, BIRD_UP_FLAP, BIRD_MID_FLAP];
   #currentFlap = 0;
@@ -31,7 +35,8 @@ export class Bird {
     jumpHeight,
     maxHeight,
     maxRotation,
-    birdDOM
+    birdDOM,
+    flySound
   ) {
     // DOM
     this.#birdDOM = birdDOM;
@@ -51,6 +56,8 @@ export class Bird {
     this.#birdDOM.style.transform = `rotate(${this.#rotation}deg)`;
     // Flap animation
     this.#birdDOM.classList.add(this.#flapAnimation[this.#currentFlap]);
+    // Sounds
+    this.#flySound = flySound;
   }
 
   // Reset Bird Position
@@ -103,6 +110,8 @@ export class Bird {
       this.#birdPosY = this.#maxHeight;
     }
     this.#birdDOM.style.bottom = this.#birdPosY + "px";
+    this.#flySound.currentTime = 0;
+    this.#flySound.play();
   }
 
   // Set Bird Speed to 0 on collision
