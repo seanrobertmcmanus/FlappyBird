@@ -14,6 +14,8 @@ export class Pipe {
   // Pipe Elements
   #bottomPipe;
   #topPipe;
+  // Points
+  #hasPoint;
   constructor(
     pipePosX,
     pipePosY,
@@ -37,6 +39,8 @@ export class Pipe {
     this.#pipeCollisionStartX = pipeCollisionStartX;
     this.#bottomPipeCollisionY = bottomPipeCollisionY;
     this.#topPipeCollisionY = topPipeCollisionY;
+    // Points
+    this.#hasPoint = false;
   }
 
   // Update Pipe Position
@@ -53,7 +57,7 @@ export class Pipe {
   }
 
   // Check Collision
-  checkCollision(birdPosX, birdPosY) {
+  checkCollision(birdPosY) {
     // Check if bird is within the bounds of the pipe
     if (
       this.#pipePosX > this.#pipeCollisionEndX &&
@@ -66,6 +70,14 @@ export class Pipe {
       ) {
         return true;
       }
+    }
+    return false;
+  }
+  // Has Passed and not been assigned a point
+  hasPassed() {
+    if (this.#pipePosX < this.#pipeCollisionEndX && !this.#hasPoint) {
+      this.#hasPoint = true;
+      return true;
     }
     return false;
   }

@@ -42,6 +42,39 @@
 }
 
 
+@keyframes groundMove {
+    from {
+        background-position: 10000% top;
+    }
+    to {
+        background-position: 0% top;
+    }
+  }
+  
+  @-webkit-keyframes groundMove {
+    from {
+        background-position: 10000% top;
+    }
+    to {
+        background-position: 0% top;
+    }
+  }
+
+.ground-moving {
+    animation: groundMove 104s linear infinite;
+    -webkit-animation: groundMove 104s infinite linear;
+    background-color: #dfd996;
+    background-image: url("/assets/images/base.png");
+    background-repeat: repeat-x;
+    width: 500px;
+    height: 150px;
+    position: absolute;
+    top: 580px;
+    z-index: 2;
+
+}
+
+
 
 /* Game Elements */
 .bird {
@@ -94,4 +127,42 @@
     background-image: inherit; /* Use the same image */
     background-repeat: no-repeat;
     transform: scaleY(-1); /* Flip the image vertically */
+}
+
+
+/* Effects */
+/* Flash */
+@keyframes flash {
+    0% {
+        background-color: transparent;
+        opacity: 1;
+    }
+    50% {
+        background-color: white;
+        opacity: 0.2;
+    }
+    100% {
+        background-color: transparent;
+        opacity: 1;
+    }
+}
+
+
+.flash {
+    background-color: white;
+    opacity: 0.2;
+    position: absolute;
+    width: 500px;
+    height: 730px;
+    z-index: 4;
+}
+
+
+.score {
+    position: absolute;
+    top: 20%;
+    left: 48%;
+    font-size: 40px;
+    color: white;
+    z-index: 5;
 }

@@ -31,7 +31,11 @@ const GRAVITY = 0.4;
 const PIPE_COLLISION_END_X = 160;
 const PIPE_COLLISION_START_X = 260;
 const BOTTOM_PIPE_COLLISION_Y = 285;
-const TOP_PIPE_COLLISION_Y = -34;
+const TOP_PIPE_COLLISION_Y = -32;
+
+// CSS Classes
+const GROUND_MOVING = "ground-moving";
+const BASE_GROUND = "ground";
 
 // DOM EVENT LISTENER
 document.addEventListener("DOMContentLoaded", () => {
@@ -46,6 +50,7 @@ class FlappyBird {
   #birdDOM;
   #skyDOM;
   #groundDOM;
+  #scoreDOM;
 
   // Game Objects
   #bird;
@@ -57,6 +62,7 @@ class FlappyBird {
   #isGameOver;
   #isCollision;
   #lastTime;
+  #score;
 
   constructor() {
     // DOM
@@ -64,7 +70,7 @@ class FlappyBird {
     this.#birdDOM = document.querySelector(".bird");
     this.#skyDOM = document.querySelector(".sky");
     this.#groundDOM = document.querySelector(".ground");
-
+    this.#scoreDOM = document.getElementById("score-container");
     // Game State
     this.#isGameOver = false;
     this.#isCollision = false;
@@ -83,9 +89,11 @@ class FlappyBird {
       this.#birdDOM
     );
     // Bind Controls
-    this.controls = this.controls.bind(this);
+    this.controls = this.controls.bind(this); // bind controls to game
     // Init Controls
     document.addEventListener("keyup", this.controls); // jump on spacebar
+    //
+    this.#score = 0;
   }
 
   // Start Menu
@@ -99,14 +107,16 @@ class FlappyBird {
       () => this.gameLoop(),
       GAME_LOOP_INTERVAL
     );
-    // Generate Pipes
+
     // Bird Flap
     this.#flapTimer = setInterval(() => {
       this.birdFlap();
     }, FLAP_INTERVAL);
-    // Score
-    console.log("Generating pipes");
+    // Generate Pipes
     this.#pipeGenTimer = setInterval(() => this.generatePipes(), PIPE_GEN_TIME);
+    // Start Ground Movement
+    this.#groundDOM.className = GROUND_MOVING;
+    // Score
   }
 
   // Game Loop
@@ -117,8 +127,13 @@ class FlappyBird {
     // Update Bird
     this.#bird.update(this.#lastTime);
 
+    // Update Score
+    this.updateScore();
     // check collision
     if (this.#bird.getPosY() <= 0) {
+      if (!this.#isCollision) {
+        this.setCollision();
+      }
       this.setGameOver();
     }
   }
@@ -126,17 +141,28 @@ class FlappyBird {
   // Game Over
   setGameOver() {
     this.#isGameOver = true;
-    console.log("Game Over");
     // Stop Game Loop
     clearInterval(this.#gameLoopTimer);
     clearInterval(this.#pipeGenTimer);
     clearInterval(this.#flapTimer);
+    // Stop Ground Movement
+    this.#groundDOM.className = BASE_GROUND;
+  }
+
+  setCollision() {
+    // Set Collision
+    this.#isCollision = true;
+    // Set Bird Speed to 0 on collision
+    this.#bird.setZeroSpeed();
+    // Stop Ground Movement
+    this.#groundDOM.className = BASE_GROUND;
+    // Flash white screen on collision
+    this.triggerFlash();
   }
 
   // Generate Pipes
   generatePipes() {
     // Create Pipe
-    console.log("Creating Pipe");
     let pipe = new Pipe(
       PIPE_START_X,
       PIPE_BASE_Y,
@@ -155,20 +181,20 @@ class FlappyBird {
       // Update Pipe Position
       if (!this.#isCollision && !this.#isGameOver) {
         pipe.update();
-        if (pipe.checkCollision(bird.x, bird.y)) {
-          // Set Collision
-          this.#isCollision = true;
-          // Set Bird Speed to 0 on collision
-          this.#bird.setZeroSpeed();
-          // Flash white screen on collision
+        if (pipe.checkCollision(bird.y)) {
+          this.setCollision();
         }
       }
-      // Check Collision
 
       // Check if pipe is off screen
       if (pipe.getPosX() === PIPE_SCREEN_END) {
         pipe.delete();
         clearInterval(timerId);
+      }
+      // Check if bird has passed pipe
+      if (pipe.hasPassed()) {
+        this.#score++;
+        this.updateScore();
       }
     };
 
@@ -176,11 +202,35 @@ class FlappyBird {
     //setTimeout(() => this.generatePipes(), PIPE_GEN_TIME);
   }
 
+  // Effects
   // Bird Flap
   birdFlap() {
     if (!this.#isCollision && !this.#isGameOver) {
       this.#bird.flap();
     }
+  }
+  // Score Update
+  updateScore() {
+    this.#scoreDOM.innerHTML = "";
+    const scoreStr = this.#score.toString();
+    for (const digit of scoreStr) {
+      const img = document.createElement("img");
+      img.src = `../assets/images/${digit}.png`; // Set the source to the correct image
+      this.#scoreDOM.appendChild(img);
+    }
+  }
+  // Screen Flash
+  triggerFlash() {
+    this.#gameDisplayDOM.style.animation = "flash 0.15s"; // Duration of 0.5s is an example, adjust as needed
+
+    // Remove the animation style after it's complete
+    this.#gameDisplayDOM.addEventListener(
+      "animationend",
+      () => {
+        this.#gameDisplayDOM.style.animation = "";
+      },
+      { once: true }
+    );
   }
   // Game Controls
   controls(e) {
