@@ -215,7 +215,7 @@ class FlappyBird {
     const scoreStr = this.#score.toString();
     for (const digit of scoreStr) {
       const img = document.createElement("img");
-      img.src = `../assets/images/${digit}.png`; // Set the source to the correct image
+      img.src = `assets/images/${digit}.png`; // Set the source to the correct image
       this.#scoreDOM.appendChild(img);
     }
   }
